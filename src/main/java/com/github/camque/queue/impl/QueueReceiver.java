@@ -1,7 +1,6 @@
 package com.github.camque.queue.impl;
 
-import java.sql.Connection;
-
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -33,7 +32,7 @@ public abstract class QueueReceiver implements IConsumer, IConsumerMXBean {
 
 		try {
 
-			//this.session = this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			this.session = this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			this.consumer = this.session.createConsumer( this.session.createQueue(queueName) );
 
 			//Listener
