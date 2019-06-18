@@ -72,32 +72,39 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 	@Override
 	public void init() {
 		LOG.info("Starting Consumers");
-		
+
 		int defaultSizeConsumer = Integer.parseInt( ParameterUtils.getParam(IParameterConstants.CONSUMERS_DEFAULT_SIZE) );
 
 		if ( this.validateConnection() ) {
 			this.consumers = new HashMap<>();
 
-			try {
-				List<String> queueNames = StringUtils.separatedListToList( ParameterUtils.getParam(IParameterConstants.CONSUMERS_NAME), ",");
-				for (String queueName : queueNames) {
-					
-					String queueAppName = ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_QUEUE_NAME, queueName) );
-					if ( this.appName.equals(queueAppName) ) {
-						String receiverName = ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_RECEIVER_CLASS_NAME, queueName ) );
-						
-						this.consumers.put(queueName, new ArrayList<IConsumer>() );
-						
-						int sizeConsumer = Integer.parseInt( ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_QUEUE_SIZE, queueName) ) );
-						
-						if ( sizeConsumer == 0 ) {
-							sizeConsumer = defaultSizeConsumer;
-						}
-						
-						for(int i=0; i<sizeConsumer; i++) {
+			List<String> queueNames = StringUtils.separatedListToList( ParameterUtils.getParam(IParameterConstants.CONSUMERS_NAME), ",");
+			for (String queueName : queueNames) {
 
-							@SuppressWarnings("rawtypes")
-							final Class classConsumer = Class.forName( receiverName );
+				String receiverName = ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_RECEIVER_CLASS_NAME, queueName ) );
+
+				this.consumers.put(queueName, new ArrayList<IConsumer>() );
+
+				int sizeConsumer = Integer.parseInt( ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_QUEUE_SIZE, queueName) ) );
+
+				if ( sizeConsumer == 0 ) {
+					sizeConsumer = defaultSizeConsumer;
+				}
+
+				boolean classExist = false;
+
+				@SuppressWarnings("rawtypes")
+				Class classConsumer = null;
+				try {
+					classConsumer = Class.forName( receiverName );
+					classExist = true;
+				} catch (ClassNotFoundException e) {
+					LOG.error( "Error on lookup class: " + StringUtils.getStackTrace(e) );
+				}
+
+				try {
+					if ( classExist ) {
+						for(int i=0; i<sizeConsumer; i++) {
 
 							@SuppressWarnings("unchecked")
 							final IConsumer consumer = (IConsumer) classConsumer
@@ -106,14 +113,13 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 
 							this.consumers.get( queueName ).add( consumer );
 						}
-						
 					}
-					
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					LOG.error( StringUtils.getStackTrace(e) );
 				}
 
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-				LOG.error( StringUtils.getStackTrace(e) );
 			}
+
 		}
 
 	}
