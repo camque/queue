@@ -11,10 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.camque.queue.IConsumer;
-import com.github.camque.queue.IConsumerMXBean;
 import com.github.camque.queue.commons.utils.StringUtils;
 
-public abstract class QueueReceiver implements IConsumer, IConsumerMXBean {
+public abstract class QueueReceiver implements IConsumer {
 
 	private static final Logger LOG = LogManager.getLogger(QueueReceiver.class);
 

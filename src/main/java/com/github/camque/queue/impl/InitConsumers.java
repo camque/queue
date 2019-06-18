@@ -1,5 +1,7 @@
 package com.github.camque.queue.impl;
 
+import static javax.ejb.ConcurrencyManagementType.BEAN;
+
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -13,11 +15,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.ConcurrencyManagement;
 import javax.ejb.DependsOn;
-import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.naming.InitialContext;
@@ -28,6 +31,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.camque.queue.IConsumer;
 import com.github.camque.queue.IInitConsumers;
+import com.github.camque.queue.IInitConsumersLocal;
+import com.github.camque.queue.IInitQueueLocal;
 import com.github.camque.queue.commons.constants.IConstants;
 import com.github.camque.queue.commons.constants.IParameterConstants;
 import com.github.camque.queue.commons.utils.ParameterUtils;
@@ -37,13 +42,14 @@ import com.github.camque.queue.thread.EnquireLinkTask;
 @DependsOn("InitQueue")
 @Startup
 @Singleton
+@ConcurrencyManagement(BEAN)
 @LocalBean
-public class InitConsumers implements IInitConsumers {
+public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 
 	private static final Logger LOG = LogManager.getLogger(InitConsumers.class);
 
-	@EJB
-	private InitQueue initQueue;
+	@Inject
+	private IInitQueueLocal initQueue;
 
 	private Map<String, List<IConsumer>> consumers;
 
@@ -63,6 +69,7 @@ public class InitConsumers implements IInitConsumers {
 	}
 
 	@PostConstruct
+	@Override
 	public void init() {
 		LOG.info("Starting Consumers");
 		
@@ -112,7 +119,7 @@ public class InitConsumers implements IInitConsumers {
 	}
 
 	@PreDestroy
-	public void close() {
+	private void close() {
 		LOG.info("Closing Consumers");
 
 		this.enquireLinkTask.cancel(true);

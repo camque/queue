@@ -1,7 +1,10 @@
 package com.github.camque.queue.impl;
 
+import static javax.ejb.ConcurrencyManagementType.BEAN;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.ConcurrencyManagement;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -13,6 +16,8 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.camque.queue.IInitQueue;
+import com.github.camque.queue.IInitQueueLocal;
 import com.github.camque.queue.commons.constants.IParameterConstants;
 import com.github.camque.queue.commons.utils.ParameterUtils;
 import com.github.camque.queue.commons.utils.StringUtils;
@@ -22,8 +27,9 @@ import com.github.camque.queue.commons.utils.StringUtils;
  */
 @Startup
 @Singleton
+@ConcurrencyManagement(BEAN)
 @LocalBean
-public class InitQueue {
+public class InitQueue implements IInitQueueLocal, IInitQueue {
 
 	private static final Logger LOG = LogManager.getLogger(InitQueue.class);
 
@@ -31,8 +37,9 @@ public class InitQueue {
 	private Connection connection = null;
 
 	private String urlBroker;
-
+	
 	@PostConstruct
+	@Override
 	public void init() {
 		this.urlBroker = ParameterUtils.getParam(IParameterConstants.BROKER_URL);
 		LOG.debug("ULR_BROKER=" + this.urlBroker);
@@ -61,7 +68,7 @@ public class InitQueue {
 	}
 
 	@PreDestroy
-	public void close() {
+	private void close() {
 		LOG.info("Closing Queue Connection");
 		try {
 
@@ -75,10 +82,12 @@ public class InitQueue {
 		}
 	}
 
+	@Override
 	public Connection getConnection() {
 		return this.connection;
 	}
 
+	@Override
 	public boolean reconnect() {
 		this.close();
 		return this.startConnection();

@@ -1,9 +1,10 @@
 package com.github.camque.queue;
 
+import javax.ejb.Remote;
+
+@Remote
 public interface IInitConsumers {
 
-	boolean validateConnection();
-
-	void reconnect();
+	void init();
 
 }
