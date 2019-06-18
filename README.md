@@ -47,8 +47,8 @@ public class InitQueue {
 
 }
 ```
-**Defining consumers: **
-Create a class that extends from the *QueueReceiver* class and overrides the *proccessMessage* method. The constructor of this class must always receive the 2 parameters of the example.
+
+**Defining consumers: ** Create a class that extends from the *QueueReceiver* class and overrides the *proccessMessage* method. The constructor of this class must always receive the 2 parameters of the example.
 
 ```java
 public class Queue1Receiver extends QueueReceiver {
@@ -82,8 +82,7 @@ public class Queue1Receiver extends QueueReceiver {
 ```
 After getting the message the business logic depends on what you want to do, for example you could do a bean lookup to execute a method.
 
-**Defining producers: **
-To define a producer, create a class that injects the *IInitQueue* interface into an attribute of its class, then take the *sendMessage* method as a reference to send a message to your queue.
+**Defining producers: ** To define a producer, create a class that injects the *IInitQueue* interface into an attribute of its class, then take the *sendMessage* method as a reference to send a message to your queue.
 
 ```java
 public class Queue1Producer {
