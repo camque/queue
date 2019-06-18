@@ -35,16 +35,21 @@ Tutorial
 - consumers.[queueName].size: Number of consumers that will have the queue.
 
 **Startup consumers:** Create a boot singleton in the following way to boot the consumers
+```java
+@Startup
+@Singleton
+@ConcurrencyManagement(BEAN)
+@LocalBean
+public class InitQueue {
 
-    @Startup
-    @Singleton
-    @LocalBean
-    public class InitQueue {
-    	@Inject
-    	private IInitConsumers initConsumers;
-    }
+	@Inject
+	private IInitConsumers initConsumers;
 
-Finally, in the desired method include the following lines of code at the beginning and end of the method, or where you want to audit the execution:
+}
+```
+**Defining consumers: **
+Create a class that extends from the *QueueReceiver* class and overrides the *proccessMessage* method. The constructor of this class must always receive the 2 parameters of the example.
+
 ```java
 public class Queue1Receiver extends QueueReceiver {
 
@@ -65,7 +70,7 @@ public class Queue1Receiver extends QueueReceiver {
 			if ( message instanceof ObjectMessage ){
 				mapMessage = (Map<String, Object>) ((ObjectMessage) message).getObject();
 
-				LOG.info("Business Logic");
+				//Business Logic
 			}
 
 		} catch (final JMSException e) {
@@ -75,8 +80,62 @@ public class Queue1Receiver extends QueueReceiver {
 
 }
 ```
+After getting the message the business logic depends on what you want to do, for example you could do a bean lookup to execute a method.
 
+**Defining producers: **
+To define a producer, create a class that injects the *IInitQueue* interface into an attribute of its class, then take the *sendMessage* method as a reference to send a message to your queue.
 
+```java
+public class Queue1Producer {
+
+	private static final Logger LOG = LogManager.getLogger(Queue1Producer.class);
+
+	@Inject
+	private IInitQueue initQueue;
+
+	@Asynchronous
+	public void sendMessage(final Object obj) {
+		Session session = null;
+        MessageProducer producer = null;
+		try {
+			session = this.initQueue.getConnection().createSession(false, Session.AUTO_ACKNOWLEDGE);
+            producer = session.createProducer( session.createQueue("queue1") );
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+            final Map<String, Object> mapMessage = this.mappingSubmit(obj);
+
+            final ObjectMessage objectMessage = session.createObjectMessage();
+            objectMessage.setObject((Serializable) mapMessage);
+
+            producer.send(objectMessage);
+
+            LOG.debug("Message Send to queue1");
+
+        } catch (final JMSException e) {
+        	LOG.error( StringUtils.getStackTrace(e) );
+        } finally {
+        	try {
+
+        		if ( producer != null ){
+                	producer.close();
+                }
+                if ( session != null ){
+                	session.close();
+                }
+
+			} catch (final JMSException e) {
+				LOG.error( StringUtils.getStackTrace(e) );
+			}
+		}
+	}
+
+	private Map<String, Object> mappingSubmit(Object obj) {
+		// Business Logic to map
+		return null;
+	}
+
+}
+```
 
 License
 -------
