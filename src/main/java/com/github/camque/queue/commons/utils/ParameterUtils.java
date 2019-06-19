@@ -12,23 +12,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ParameterUtils {
-	
+
 	private static final Logger LOG = LogManager.getLogger(ParameterUtils.class);
-	
+
 	private static Properties parameters;
-	
+
 	/**
 	 * Get a value parameter
-	 * @param key
-	 * @return
+	 * @param key Parameter name
+	 * @return Parameter value
 	 */
 	public static String getParam(String key) {
 		if ( parameters == null ) {
 			loadParameters();
 		}
-		
+
 		return parameters.getProperty(key);
-		
+
 	}
 
 	/**
@@ -36,18 +36,18 @@ public class ParameterUtils {
 	 */
 	private static void loadParameters() {
 		parameters = new Properties();
-		
-		String pathFile = System.getProperty("jboss.server.config.dir") + "/" + "queue.properties";
+
+		final String pathFile = System.getProperty("jboss.server.config.dir") + "/" + "queue.properties";
 		LOG.info(pathFile);
-		
+
 		try (BufferedReader bufferedReader = Files.newBufferedReader( Paths.get(pathFile) ) ) {
 			parameters.load(bufferedReader);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         	LOG.info("Error al leer archivo de propiedades.");
 			LOG.error("", e);
 		}
 	}
-	
+
 	/**
 	 * Load parameters file
 	 */

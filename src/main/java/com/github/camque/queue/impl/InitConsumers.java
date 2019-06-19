@@ -133,7 +133,7 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 	}
 
 	/**
-	 * @see com.mobiera.smart.queue.IInitConsumers#validateConnection()
+	 * @see com.github.camque.queue.IInitConsumersLocal#validateConnection()
 	 */
 	@Override
 	public boolean validateConnection() {
@@ -154,7 +154,7 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 	}
 
 	/**
-	 * @see com.mobiera.smart.queue.IInitConsumers#scheduleReconnect()
+	 * @see com.github.camque.queue.IInitConsumersLocal#reconnect()
 	 */
 	@Override
 	public void reconnect() {

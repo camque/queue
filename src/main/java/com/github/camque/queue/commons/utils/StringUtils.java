@@ -11,19 +11,19 @@ public class StringUtils {
 	/**
      * Get stacktrace
      * @param e Exception
-     * @return
+     * @return Exception in string
      */
     public static String getStackTrace(final Exception e){
     	final StringWriter errors = new StringWriter();
 		e.printStackTrace( new PrintWriter(errors) );
 		return errors.toString();
     }
-    
+
     /**
      * Converts a separate | (pipe) string in a list
      * @param value Value to separate
      * @param separator Character delim
-     * @return
+     * @return List separated
      */
 	public static List<String> separatedListToList(final String value, final String separator){
 		final List<String> list = new ArrayList<>();
