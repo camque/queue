@@ -23,8 +23,6 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.jms.Connection;
 import javax.jms.JMSException;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +31,6 @@ import com.github.camque.queue.IConsumer;
 import com.github.camque.queue.IInitConsumers;
 import com.github.camque.queue.IInitConsumersLocal;
 import com.github.camque.queue.IInitQueueLocal;
-import com.github.camque.queue.commons.constants.IConstants;
 import com.github.camque.queue.commons.constants.IParameterConstants;
 import com.github.camque.queue.commons.utils.ParameterUtils;
 import com.github.camque.queue.commons.utils.StringUtils;
@@ -53,19 +50,12 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 
 	private Map<String, List<IConsumer>> consumers;
 
-	private ScheduledExecutorService enquireLinkExecutor;
+	private final ScheduledExecutorService enquireLinkExecutor;
 	private ScheduledFuture<?> enquireLinkTask;
 
-	private String appName;
-
 	public InitConsumers() {
-		try {
-			this.appName = InitialContext.doLookup(IConstants.JNDI_APP_NAME);
-			this.enquireLinkExecutor = Executors.newSingleThreadScheduledExecutor();
-			this.runEnquireLinkTask();
-		} catch (final NamingException e) {
-			LOG.error( StringUtils.getStackTrace(e) );
-		}
+		this.enquireLinkExecutor = Executors.newSingleThreadScheduledExecutor();
+		this.runEnquireLinkTask();
 	}
 
 	@PostConstruct
@@ -73,15 +63,15 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 	public void init() {
 		LOG.info("Starting Consumers");
 
-		int defaultSizeConsumer = Integer.parseInt( ParameterUtils.getParam(IParameterConstants.CONSUMERS_DEFAULT_SIZE) );
+		final int defaultSizeConsumer = Integer.parseInt( ParameterUtils.getParam(IParameterConstants.CONSUMERS_DEFAULT_SIZE) );
 
 		if ( this.validateConnection() ) {
 			this.consumers = new HashMap<>();
 
-			List<String> queueNames = StringUtils.separatedListToList( ParameterUtils.getParam(IParameterConstants.CONSUMERS_NAME), ",");
-			for (String queueName : queueNames) {
+			final List<String> queueNames = StringUtils.separatedListToList( ParameterUtils.getParam(IParameterConstants.CONSUMERS_NAME), ",");
+			for (final String queueName : queueNames) {
 
-				String receiverName = ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_RECEIVER_CLASS_NAME, queueName ) );
+				final String receiverName = ParameterUtils.getParam( MessageFormat.format(IParameterConstants.CONSUMERS_RECEIVER_CLASS_NAME, queueName ) );
 
 				this.consumers.put(queueName, new ArrayList<IConsumer>() );
 
@@ -98,7 +88,7 @@ public class InitConsumers implements IInitConsumersLocal, IInitConsumers {
 				try {
 					classConsumer = Class.forName( receiverName );
 					classExist = true;
-				} catch (ClassNotFoundException e) {
+				} catch (final ClassNotFoundException e) {
 					LOG.error( "Error on lookup class: " + StringUtils.getStackTrace(e) );
 				}
 
