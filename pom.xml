@@ -194,7 +194,7 @@
 				</dependencies>
 			</plugin>
 
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>${version.source.plugin}</version>
@@ -259,7 +259,7 @@
 					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
-			</plugin> -->
+			</plugin>
 
 		</plugins>
 	</build>
